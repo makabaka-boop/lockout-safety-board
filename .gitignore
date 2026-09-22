@@ -1,0 +1,15 @@
+# 依赖与产物
+node_modules/
+dist/
+coverage/
+
+# 日志与环境
+*.log
+.env
+.env.local
+
+# 嵌入式 PostgreSQL（本地验证用）
+.embedded-postgres/
+
+# 系统文件
+.DS_Store

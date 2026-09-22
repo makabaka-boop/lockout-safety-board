@@ -1,0 +1,6 @@
+node_modules
+dist
+.embedded-postgres
+.git
+*.log
+coverage

@@ -1,0 +1,41 @@
+{
+  "name": "loto-isolation-board",
+  "version": "1.0.0",
+  "private": true,
+  "description": "检修隔离牌板（LOTO）：React + Fastify + PostgreSQL，多实例单调修订号并发裁决",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c green,blue \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:web": "vite",
+    "dev:api": "node --watch server/start.js",
+    "build": "vite build",
+    "migrate": "node server/migrate.js",
+    "seed": "node server/seed.js",
+    "start": "node server/start.js",
+    "test": "vitest run",
+    "verify": "node server/migrate.js && node server/seed.js && vitest run"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^9.3.1",
+    "@fastify/cors": "^9.0.1",
+    "@fastify/static": "^7.0.4",
+    "fastify": "^4.28.1",
+    "pg": "^8.12.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.0.1",
+    "embedded-postgres": "^17.4.0-beta.10",
+    "jsdom": "^25.0.1",
+    "vite": "^5.4.8",
+    "vitest": "^2.1.2"
+  }
+}

@@ -1,0 +1,71 @@
+# 检修隔离牌板：两个 API 实例共享一个 PostgreSQL 裁决；
+# nginx 以 WEB_PORT 对外发布页面并把 /api 轮询到两个实例；
+# verify 是一次性验收服务（docker compose --profile verify run --rm verify）。
+x-api-environment: &api-environment
+  DATABASE_URL: postgres://loto:loto@db:5432/loto_board
+  NODE_ENV: production
+  LOG_LEVEL: info
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: loto
+      POSTGRES_PASSWORD: loto
+      POSTGRES_DB: loto_board
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U loto -d loto_board']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api1:
+    build:
+      context: .
+      target: runtime
+    environment:
+      <<: *api-environment
+      INSTANCE_ID: api1
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api2:
+    build:
+      context: .
+      target: runtime
+    environment:
+      <<: *api-environment
+      INSTANCE_ID: api2
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      target: web
+    ports:
+      # 页面发布端口由 WEB_PORT 控制（默认 8088）
+      - '${WEB_PORT:-8088}:80'
+    depends_on:
+      - api1
+      - api2
+
+  # 一次性验收：迁移 + 种子 + 连接真实数据库的 Vitest（含两实例竞争与界面重载）
+  verify:
+    profiles: ['verify']
+    build:
+      context: .
+      dockerfile: Dockerfile.verify
+    environment:
+      DATABASE_URL: postgres://loto:loto@db:5432/loto_board
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: 'no'
+
+volumes:
+  pgdata:

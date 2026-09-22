@@ -1,0 +1,8 @@
+# verify 一次性服务复用构建产物（vitest 需要 devDependencies 与前端源码）
+FROM node:20-alpine AS verify
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm install
+COPY . .
+RUN npm run build
+CMD ["npm", "run", "verify"]
